@@ -15,7 +15,8 @@
  * limitations under the License.
  *
  * Very basic LLCP implementation. Only supports a single data packet, i.e.
- * no sequence numbers, retry etc.
+ * no sequence numbers, retry etc. Developed based on the NFC Forum Spec:
+ * http://www.nfc-forum.org/specs/spec_list/
  */
 
 #include <avr/io.h>
