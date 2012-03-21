@@ -17,17 +17,20 @@ MCU ?= atmega328p
 F_CPU ?= 3580000   	# 3.58 MHz
 
 # Objects to be added
-#	base_station.pb.o
-#	config.o \
-#       enc.o \
-       pasori_common.o \
-       pasori_initiator.o \
-       power_down.o \
-       initiator.o \
-       main.o \
-       nfc_url2.o \
 
-OBJS = crypto/avr_aes_enc.o \
+#	base_station.pb.o \
+	config.o \
+       initiator.o \
+       main.o
+
+OBJS = \
+       proto/base_station.pb.o \
+       eeprom_data.o \
+       enc.o \
+       nfc_url2.o
+
+LIB_OBJS = \
+       crypto/avr_aes_enc.o \
        crypto/avr_sha1.o \
        crypto/ws_base64_enc.o \
        nfc/felica_push.o \
@@ -35,6 +38,7 @@ OBJS = crypto/avr_aes_enc.o \
        peripheral/eeprom.o \
        peripheral/led.o \
        peripheral/module_power.o \
+       peripheral/power_down.o \
        peripheral/sound.o \
        peripheral/switch.o \
        peripheral/timer.o \
@@ -57,11 +61,14 @@ TEST_OBJS= \
        test/test.o \
        test/ws_base64_enc_test.o
 
+ALL_OBJS = $(OBJS) $(LIB_OBJS) $(TARGET_OBJS) $(TEST_OBJS)
+
 EEP = station.eep
 
 # Default target.
 all: 	begin gccversion \
 	station.hex $(EEP) \
+	test.hex \
 	size \
 	config \
 	finished end
@@ -100,8 +107,8 @@ CFLAGS += -std=gnu99
 ifeq ("$(TARGET)", "")
   # header file decides URl
 
-else ifeq ($(TARGET), CONVERSION)
-  CFLAGS += -DGOOGLE_URL='"http://nfcofflineconversion.appspot.com/touch?nv="'
+else ifeq ($(TARGET), DEMO)
+  CFLAGS += -DURL='"http://nfcofflineconversion.appspot.com"'
 
 else
   $(error unknown TARGET)
@@ -116,7 +123,7 @@ endif
 
 # If enabled, the base station will behave as an NFC type 3 target.
 ifdef WITH_TARGET
-  OBJS += llcp.o llcp_beam.o snep.o pasori_target.o sp.o target.o type3tag.o
+  OBJS += $(TARGET_OBJS)
   CFLAGS += -DWITH_TARGET
 endif
 
@@ -275,12 +282,12 @@ gccversion :
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $< --output $@ $(LDFLAGS)
 
-station.elf: $(OBJS)
+station.elf: $(OBJS) $(LIB_OBJS)
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
 
-test.elf: $(TEST_OBJS) $(OBJS) $(TARGET_OBJS)
+test.elf: $(TEST_OBJS) $(LIB_OBJS) $(TARGET_OBJS)
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
@@ -305,7 +312,7 @@ test.elf: $(TEST_OBJS) $(OBJS) $(TARGET_OBJS)
 	$(CC) -c $(ALL_ASFLAGS) $< -o $@
 
 
-base_station.pb.c: ../../../../../google3/java/com/google/wireless/nfc/proto/base_station.proto
+base_station.pb.c: base_station.proto
 	@echo
 	@echo $(MSG_ASSEMBLING) $<
 	python protobufs_cc.py -o base_station < $<
@@ -329,8 +336,8 @@ clean_list :
 	$(REMOVE) *.hex
 	$(REMOVE) *.elf
 	$(REMOVE) $(EEP)
-	$(REMOVE) $(OBJS) $(TARGET_OBJS) $(TEST_OBJS)
-	$(REMOVE) $(subst .o, .lst, $(OBJS) $(TARGET_OBJS) $(TEST_OBJS))
+	$(REMOVE) $(ALL_OBJS)
+	$(REMOVE) $(subst .o,.lst,$(ALL_OBJS))
 	$(REMOVE) base_station.pb.c base_station.pb.h
 
 # Listing of phony targets.
