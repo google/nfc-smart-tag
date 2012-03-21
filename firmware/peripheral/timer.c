@@ -14,41 +14,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Simple background timing for debugging and testing
+ * Simple background timing for debugging and testing. Timers cannot nest.
+ * Values are approximate. Interrupt handling (minimally) slows processing,
+ * about 20 clock cycles per interrupt.
+ *
  * Uses 16 bit Timer/Counter 1
  */
+
+#include <stdbool.h>
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
 
 #include "timer.h"
 
-static int counter = 0;
+static unsigned int counter = 0;
+static bool raw = false;
 
 ISR(TIMER1_COMPA_vect)
 {
-  counter++;
+  ++counter;
 }
 
 /*
- * Starts 16 bit timer with the specified resolution from 0 in CTC mode.
+ * Starts 16 bit timer with the specified resolution.
+ * Uses CTC mode for real time, normal mode for clock count.
  */
 void start_timer(enum TIMER_RESOLUTION resolution)
 {
-  TCCR1B = 0; // stop counter
+  TCCR1B = 0;  // Stop counter
+  TCNT1 = 0;
   counter = 0;
-  OCR1A = resolution;
-  TCCR1B |= _BV(WGM12); // CTC mode
-  TIMSK1 |= _BV(OCIE1A); // Match interrupt enable
-  TCCR1B |= _BV(CS11); // set prescaler to CLK/8
+  if (resolution == TIMER_RES_CLOCK) {
+    TIMSK1 = 0;  // No timer interrupts
+    raw = true;
+  } else {
+    OCR1A = resolution;
+    TCCR1B |= _BV(WGM12);  // CTC mode
+    TIMSK1 |= _BV(OCIE1A);  // Match interrupt enable
+    sei();
+  }
+  TCCR1B |= _BV(CS10);  // Clock Select = CLK
 }
 
 /*
  * Returns the number of time units passed since start_timer
  */
-int get_timer()
+unsigned int get_timer()
 {
-  return counter;
+  if (raw)
+    return TCNT1 - 5;  // compensate for function call
+  else
+    return counter;
 }
 
 /*

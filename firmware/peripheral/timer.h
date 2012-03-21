@@ -14,23 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Simple background timing for debugging and testing
- * Uses 16 bit Timer/Counter 1
+ * Simple background timing for debugging and testing. Timers cannot nest.
+ * Uses 16 bit Timer/Counter 1.
  */
 
 #ifndef TIMER_H_
 #define TIMER_H_
 
+// Set the timer slower to compensate for additional run-time due to
+// counter interrupt (est. 30 clock cycles).
 enum TIMER_RESOLUTION {
-    TIMER_RES_1ms = F_CPU / 8 / 1000,
-    TIMER_RES_100us = F_CPU / 8 / 10000
+    TIMER_RES_CLOCK = 1,
+    TIMER_RES_1ms = F_CPU / 1000 + 30,
+    TIMER_RES_100us = F_CPU / 10000 + 30
 };
 
 // Starts 16 bit timer with the specified resolution.
 void start_timer(enum TIMER_RESOLUTION resolution);
 
 // Returns the number of time units passed since start_timer.
-int get_timer();
+unsigned int get_timer();
 
 // Stops the timer. The last timer value is preserved.
 void stop_timer();

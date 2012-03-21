@@ -26,6 +26,7 @@
 #include "test.h"
 
 // No need to make header files for these methods
+void avr_aes_enc_test(void);
 void avr_sha1_test(void);
 void ws_base_64_enc_test(void);
 
@@ -35,9 +36,10 @@ void llcp_test(void);
 int main() {
   test_init();
 
-  ws_base_64_enc_test();
+  avr_aes_enc_test();
   avr_sha1_test();
-
+  ws_base_64_enc_test();
+  
   felica_push_test();
   llcp_test();
 
