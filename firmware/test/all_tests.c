@@ -33,6 +33,8 @@ void ws_base_64_enc_test(void);
 void felica_push_test(void);
 void llcp_test(void);
 
+void eeprom_test(void);
+
 int main() {
   test_init();
 
@@ -42,6 +44,8 @@ int main() {
 
   felica_push_test();
   llcp_test();
+
+  eeprom_test();
 
   success();
   return 0;  // unreachable

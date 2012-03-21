@@ -85,7 +85,7 @@ bool usart_has_data(void)
 uint8_t usart_get(void)
 {
   set_sleep_mode(SLEEP_MODE_IDLE);
-  while (!usart_has_char()) {
+  while (!usart_has_data()) {
     sleep_mode();
   }
 
@@ -120,7 +120,7 @@ void usart_send_buf(const uint8_t* buf, int len)
 {
   int i;
   for (i = 0; i < len; i++) {
-    usart_send_char(*buf++);
+    usart_send(*buf++);
   }
 }
 
@@ -131,7 +131,7 @@ void usart_send_buf_p(const prog_char* buf,int len)
 {
   int i;
   for (i = 0; i < len; i++) {
-    usart_send_char(pgm_read_byte(buf++));
+    usart_send(pgm_read_byte(buf++));
   }
 }
 

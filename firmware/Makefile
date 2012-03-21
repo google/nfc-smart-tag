@@ -17,41 +17,41 @@ MCU ?= atmega328p
 F_CPU ?= 3580000   	# 3.58 MHz
 
 # Objects to be added
-#	base_station.pb.o 
+#	base_station.pb.o
 #	config.o \
 #       enc.o \
+       pasori_common.o \
+       pasori_initiator.o \
+       power_down.o \
+       initiator.o \
+       main.o \
+       nfc_url2.o \
 
 OBJS = crypto/avr_aes_enc.o \
        crypto/avr_sha1.o \
        crypto/ws_base64_enc.o \
-       peripheral/battery.o \
-       eeprom.o \
-       initiator.o \
-       peripheral/led.o \
-       main.o \
-       nfc_url2.o \
        nfc/felica_push.o \
-       pasori_common.o \
-       pasori_initiator.o \
+       peripheral/battery.o \
+       peripheral/eeprom.o \
+       peripheral/led.o \
        peripheral/module_power.o \
-       power_down.o \
        peripheral/sound.o \
        peripheral/switch.o \
        peripheral/timer.o \
        peripheral/usart.o
 
-TEST_OBJS= \
-       crypto/avr_aes_enc.o \
-       crypto/avr_sha1.o \
-       crypto/ws_base64_enc.o \
-       nfc/felica_push.o \
+TARGET_OBJS = \
        nfc/llcp.o \
+       nfc/snep.o \
+       nfc/sp.o \
+       nfc/type3tag.o
+
+TEST_OBJS= \
        peripheral/lcd.o \
-       peripheral/sound.o \
-       peripheral/timer.o \
        test/all_tests.o \
        test/avr_aes_enc_test.o \
        test/avr_sha1_test.o \
+       test/eeprom_test.o \
        test/felica_push_test.o \
        test/llcp_test.o \
        test/test.o \
@@ -280,7 +280,7 @@ station.elf: $(OBJS)
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
 
-test.elf: $(TEST_OBJS)
+test.elf: $(TEST_OBJS) $(OBJS) $(TARGET_OBJS)
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
@@ -327,13 +327,10 @@ clean_list :
 	@echo
 	@echo $(MSG_CLEANING)
 	$(REMOVE) *.hex
-	$(REMOVE) $(EEP)
-	$(REMOVE) *.lst
-	$(REMOVE) *.obj
 	$(REMOVE) *.elf
-	$(REMOVE) *.o
-	$(REMOVE) $(OBJS)
-	$(REMOVE) $(TEST_OBJS)
+	$(REMOVE) $(EEP)
+	$(REMOVE) $(OBJS) $(TARGET_OBJS) $(TEST_OBJS)
+	$(REMOVE) $(subst .o, .lst, $(OBJS) $(TARGET_OBJS) $(TEST_OBJS))
 	$(REMOVE) base_station.pb.c base_station.pb.h
 
 # Listing of phony targets.
