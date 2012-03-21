@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * AES-128 Encryption based on a naive implementation from the spec:
  * http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
+ * AES-128 Encryption based on a naive implementation from the spec:
  * and then optimized as described in the comments.
  *
  * Key expansion: ~4000 cycles (1.2ms @ 3.58MHz)
@@ -78,10 +78,9 @@ const uint8_t PROGMEM sbox[256] = {
  */
 static void SubBytes(uint8_t *data, uint8_t count)
 {
-  uint8_t i;
-  for (i = 0; i < count; i++) {
-    data[i] = pgm_read_byte(sbox + data[i]);
-  }
+  do {
+    *data++ = pgm_read_byte(sbox + *data);
+  } while (--count);
 }
 
 /*
@@ -167,7 +166,7 @@ static void MixColumn(uint8_t *column)
   column[3] = result[3];
 }
 
-void MixColumns(uint8_t *state)
+static void MixColumns(uint8_t *state)
 {
   MixColumn(state + 0*4);
   MixColumn(state + 1*4);
@@ -175,7 +174,7 @@ void MixColumns(uint8_t *state)
   MixColumn(state + 3*4);
 }
 
-void XORBytes(uint8_t *bytes1, uint8_t *bytes2, uint8_t count)
+static void XORBytes(uint8_t *bytes1, uint8_t *bytes2, uint8_t count)
 {
   do {
     *bytes1++ ^= *bytes2++;
@@ -224,7 +223,7 @@ static void RotWord(uint8_t *word)
  * - Avoid MOD operation
  * - Only consider 128bit key
  */
-void KeyExpansion(uint8_t *key, uint8_t *expandedKey)
+static void KeyExpansion(uint8_t *key, uint8_t *expandedKey)
 {
   uint8_t temp[4];
   uint8_t i;

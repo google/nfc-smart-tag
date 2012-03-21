@@ -23,10 +23,12 @@
 
 #include "../crypto/avr_aes_enc.h"
 
-#include "test.h"
-
 #include "../peripheral/lcd.h"
 #include "../peripheral/timer.h"
+
+#include "util/delay.h"
+
+#include "test.h"
 
 static void test_vector_spec() {
   test("vector_spec");
@@ -39,16 +41,17 @@ static void test_vector_spec() {
                        0xd8, 0xcd, 0xb7, 0x80, 0x70, 0xb4, 0xc5, 0x5a };
   uint8_t buffer[16];
 
-  start_timer(TIMER_RES_CLOCK);  
+  start_timer(TIMER_RES_CLOCK);
   aes128_init(key, &ctx);
   stop_timer();
   lcd_printf(0, "aes key %i", get_timer());
   memcpy(buffer, plaintext, 16);
-  start_timer(TIMER_RES_CLOCK);  
-  aes128_enc(buffer, &ctx);  
+  start_timer(TIMER_RES_CLOCK);
+  aes128_enc(buffer, &ctx);
   stop_timer();
   lcd_printf(0, "aes enc %i", get_timer());
   assert(memcmp(buffer, expected, 16) == 0);
+  start_timer(TIMER_RES_100us);
 }
 
 static void test_vector_gladman() {
@@ -56,15 +59,15 @@ static void test_vector_gladman() {
   aes128_ctx_t ctx;
   uint8_t plaintext[] = { 0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d,
                           0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34 };
-  uint8_t key[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 
+  uint8_t key[] = { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
                     0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c };
-  uint8_t expected [] = { 0x39, 0x25, 0x84, 0x1d, 0x02, 0xdc, 0x09, 0xfb, 
+  uint8_t expected [] = { 0x39, 0x25, 0x84, 0x1d, 0x02, 0xdc, 0x09, 0xfb,
                           0xdc, 0x11, 0x85, 0x97, 0x19, 0x6a, 0x0b, 0x32 };
   uint8_t buffer[16];
-  
+
   aes128_init(key, &ctx);
   memcpy(buffer, plaintext, 16);
-  aes128_enc(buffer, &ctx);  
+  aes128_enc(buffer, &ctx);
   assert(memcmp(buffer, expected, 16) == 0);
 }
 

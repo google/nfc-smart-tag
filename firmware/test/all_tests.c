@@ -39,7 +39,7 @@ int main() {
   avr_aes_enc_test();
   avr_sha1_test();
   ws_base_64_enc_test();
-  
+
   felica_push_test();
   llcp_test();
 

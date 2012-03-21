@@ -16,14 +16,41 @@
 MCU ?= atmega328p
 F_CPU ?= 3580000   	# 3.58 MHz
 
+# Objects to be added
+#	base_station.pb.o 
+#	config.o \
+#       enc.o \
+
+OBJS = crypto/avr_aes_enc.o \
+       crypto/avr_sha1.o \
+       crypto/ws_base64_enc.o \
+       peripheral/battery.o \
+       eeprom.o \
+       initiator.o \
+       peripheral/led.o \
+       main.o \
+       nfc_url2.o \
+       nfc/felica_push.o \
+       pasori_common.o \
+       pasori_initiator.o \
+       peripheral/module_power.o \
+       power_down.o \
+       peripheral/sound.o \
+       peripheral/switch.o \
+       peripheral/timer.o \
+       peripheral/usart.o
+
 TEST_OBJS= \
+       crypto/avr_aes_enc.o \
        crypto/avr_sha1.o \
        crypto/ws_base64_enc.o \
        nfc/felica_push.o \
        nfc/llcp.o \
        peripheral/lcd.o \
        peripheral/sound.o \
+       peripheral/timer.o \
        test/all_tests.o \
+       test/avr_aes_enc_test.o \
        test/avr_sha1_test.o \
        test/felica_push_test.o \
        test/llcp_test.o \
@@ -34,7 +61,9 @@ EEP = station.eep
 
 # Default target.
 all: 	begin gccversion \
-	test \
+	station.hex $(EEP) \
+	size \
+	config \
 	finished end
 
 #	generate_version_info \
@@ -83,6 +112,51 @@ endif
 ifdef HAS_LCD
   OBJS += peripheral/lcd.o
   CFLAGS += -DHAS_LCD
+endif
+
+# If enabled, the base station will behave as an NFC type 3 target.
+ifdef WITH_TARGET
+  OBJS += llcp.o llcp_beam.o snep.o pasori_target.o sp.o target.o type3tag.o
+  CFLAGS += -DWITH_TARGET
+endif
+
+# Star LEDs in background. Disables low power mode.
+ifdef WITH_BLINKING
+  OBJS += blink.o play_pattern.o
+  CFLAGS += -DWITH_BLINKING
+endif
+
+# Watch dog timer.
+ifdef WITH_WATCHDOG
+  CFLAGS += -DWITH_WATCHDOG
+endif
+
+# Do not include real phone IDM in URL
+ifdef WITH_FAKE_IDM
+  CFLAGS += -DFAKE_IDM
+endif
+
+# Push button feature on PB1 (PCINT1).
+# Base station shuts down after non-use and wakes up by PB1 low.
+ifdef WITH_PUSH_BUTTON
+  CFLAGS += -DWITH_PUSH_BUTTON
+endif
+
+# Blink activity LED, useful for battery powered devices
+ifdef WITH_BLINK_LED
+  CFLAGS += -DWITH_BLINK_LED
+endif
+
+# Reset device if external power is plugged in or out. Useful for device
+# with built-in battery charger.
+ifdef HAS_CHARGER
+  CFLAGS += -DHAS_CHARGER
+endif
+
+# The device uses a digital transistor for NFC module power control,
+# meaning the I/O pin has to go high to enable power to the NFC module.
+ifdef HAS_DIGITRANS
+  CFLAGS += -DHAS_DIGITRANS
 endif
 
 # Optional assembler flags.
@@ -231,6 +305,11 @@ test.elf: $(TEST_OBJS)
 	$(CC) -c $(ALL_ASFLAGS) $< -o $@
 
 
+base_station.pb.c: ../../../../../google3/java/com/google/wireless/nfc/proto/base_station.proto
+	@echo
+	@echo $(MSG_ASSEMBLING) $<
+	python protobufs_cc.py -o base_station < $<
+
 # Program Fuses (includes BOD = 2.7V)
 fuse_osc_lo:
 	hidspx -d9 -fL0xCC -fX0xFD
@@ -254,6 +333,7 @@ clean_list :
 	$(REMOVE) *.elf
 	$(REMOVE) *.o
 	$(REMOVE) $(OBJS)
+	$(REMOVE) $(TEST_OBJS)
 	$(REMOVE) base_station.pb.c base_station.pb.h
 
 # Listing of phony targets.
