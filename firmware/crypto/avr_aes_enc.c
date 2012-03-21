@@ -19,7 +19,7 @@
  * and then optimized as described in the comments.
  *
  * Key expansion: ~4000 cycles (1.2ms @ 3.58MHz)
- * Encrypting one block: ~8000 cycles (2.2ms @ 3.58MHz)
+ * Encrypting one block: ~6700 cycles (1.9ms @ 3.58MHz)
  *
  * Method names use a different convention as they are taken from the spec.
  */
