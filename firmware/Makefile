@@ -17,10 +17,7 @@ MCU ?= atmega328p
 F_CPU ?= 3580000   	# 3.58 MHz
 
 # Objects to be added
-
-#	base_station.pb.o \
-	config.o \
-       initiator.o \
+#      initiator.o \
        main.o
 
 OBJS = \
