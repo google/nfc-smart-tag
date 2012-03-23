@@ -35,9 +35,9 @@
 static uint16_t __checksum(uint8_t *data, uint8_t len)
 {
   uint16_t cksum = 0;
-  for (uint8_t i = 0; i < len; i++) {
-    cksum -= data[i];
-  }
+  do {
+    cksum -= *data++;
+  } while (--len);
   return cksum;
 }
 

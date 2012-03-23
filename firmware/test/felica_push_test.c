@@ -49,6 +49,7 @@ static void test_felica_push() {
   url = "abc";
 
   uint8_t expected[] = {
+    0x19, // Total length, including length byte
     0xb0, // command
     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, // idm
     0x0e, // data size
@@ -83,6 +84,7 @@ static void test_felica_push_no_label() {
   url = "abc";
 
   uint8_t expected[] = {
+    0x16, // Total length, including length byte
     0xb0, // command
     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, // idm
     0x0b, // data size
