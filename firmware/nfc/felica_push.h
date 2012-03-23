@@ -23,6 +23,7 @@
 #ifndef NFC_FELICA_PUSH_H_
 #define NFC_FELICA_PUSH_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #define IDM_LENGTH 8
@@ -35,5 +36,8 @@ uint8_t felica_push_url(
     uint8_t *buf, uint8_t buf_size,
     uint8_t *idm, make_url_fp make_url, void * extra,
     const char *label);
+
+// Returns true iff the buffer contains a valid Felica push response.
+bool is_felica_push_response(uint8_t *buf, uint8_t len);
 
 #endif  // NFC_FELICA_PUSH_H_
