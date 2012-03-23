@@ -29,13 +29,8 @@
 void module_power_up(void)
 {
   MODULE_POWER_DDR |= _BV(MODULE_POWER_PIN);
-#ifdef HAS_DIGITRANS
-  // Output port high = power on
-  MODULE_POWER_PORT |= _BV(MODULE_POWER_PIN);
-#else
   // Output port low = power on
   MODULE_POWER_PORT &= ~_BV(MODULE_POWER_PIN);
-#endif
   // RC-620 Startup time ~70ms
   _delay_ms(100);
   usart_init();
