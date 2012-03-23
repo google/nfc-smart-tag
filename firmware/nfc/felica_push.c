@@ -28,6 +28,9 @@
 #define L8(x) ((x) & 0xff)
 #define H8(x) (((x) >> 8) & 0xff)
 
+#define CMD_PUSH 0xb0
+#define RES_PUSH 0xb1
+
 /*
  * Computes 16 bit checksum over max 256 bytes so that all data added
  * to checksum yields 0.
@@ -59,17 +62,18 @@ uint8_t felica_push_url(
     const char *label)
 {
   uint8_t url_size, label_size;
-  uint8_t len_idx, param_len_idx, block_idx;
+  uint8_t len_idx, payload_len_idx, param_len_idx, block_idx;
   uint8_t idx = 0;
   uint16_t cksum;
 
   // Command header per Mobile Felica IC Chip Function Manual
-  buf[idx++] = 0xb0;
+  len_idx = idx++;  // Length filled below
+  buf[idx++] = CMD_PUSH;
   memcpy(&buf[idx], idm, IDM_LENGTH);
   idx += IDM_LENGTH;
-  len_idx = idx++; // filled in below
 
   // Payload as per External Reader/Writer Data Format Specification
+  payload_len_idx = idx++; // filled in below
   block_idx = idx;
   buf[idx++] = 0x01; // Number of data blocks
   buf[idx++] = 0x02; // Target: Browser
@@ -99,8 +103,20 @@ uint8_t felica_push_url(
   buf[idx++] = H8(cksum);
   buf[idx++] = L8(cksum);
 
-  // Fill in command size
-  buf[len_idx] = idx - len_idx - 1;
+  // Fill in payload size
+  buf[payload_len_idx] = idx - payload_len_idx - 1;
+
+  // Fill in total size, including length byte
+  buf[len_idx] = idx;
 
   return idx;
+}
+
+/*
+ * Returns true iff the buffer contains a valid response to a
+ * Felica push command of the specified length.
+ */
+bool is_felica_push_response(uint8_t *buf, uint8_t len) {
+  // Check net payload length (omit length, command, IDM, data size
+  return (buf[1] == RES_PUSH) && (buf[10] == len - 11);
 }
