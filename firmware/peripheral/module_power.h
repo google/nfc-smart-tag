@@ -25,9 +25,9 @@
 #define MODULE_POWER_PIN 4
 
 // Turns on power to NFC module and waits until it is ready to receive commands
-void module_hard_power_up(void);
+void module_power_up(void);
 
 // Disables the serial port and turns off power to the NFC module.
-void module_hard_power_down(void);
+void module_power_down(void);
 
 #endif /* __MODULE_POWER_H__ */

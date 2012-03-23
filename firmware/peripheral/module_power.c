@@ -26,7 +26,7 @@
  * Turns on power to NFC module and waits until it is
  * ready to receive commands.
  */
-void module_hard_power_up(void)
+void module_power_up(void)
 {
   MODULE_POWER_DDR |= _BV(MODULE_POWER_PIN);
 #ifdef HAS_DIGITRANS
@@ -44,7 +44,7 @@ void module_hard_power_up(void)
 /*
  * Disables the serial port and turns off power to the NFC module.
  */
-void module_hard_power_down(void)
+void module_power_down(void)
 {
   // Sets USART pins to high impedance to avoid powering the module
   // through the I/O pins.
