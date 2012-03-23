@@ -16,15 +16,21 @@
 MCU ?= atmega328p
 F_CPU ?= 3580000   	# 3.58 MHz
 
-# Objects to be added
-#      initiator.o \
-       main.o
+# Name of the Hex image to generate
+IMAGE=station
 
 OBJS = \
-       proto/base_station.pb.o \
        eeprom_data.o \
        enc.o \
-       nfc_url2.o
+       initiator.o \
+       nfc_url2.o \
+       proto/base_station.pb.o \
+       station_rcs956.o
+
+RCS956_OBJS = \
+       rcs956/rcs956_common.o \
+       rcs956/rcs956_initiator.o \
+       rcs956/rcs956_protocol.o
 
 LIB_OBJS = \
        crypto/avr_aes_enc.o \
@@ -58,20 +64,21 @@ TEST_OBJS= \
        test/test.o \
        test/ws_base64_enc_test.o
 
-ALL_OBJS = $(OBJS) $(LIB_OBJS) $(TARGET_OBJS) $(TEST_OBJS)
+ALL_OBJS = $(OBJS) $(LIB_OBJS) $(TARGET_OBJS) $(RCS956_OBJS) $(TEST_OBJS)
 
-EEP = station.eep
+EEP = $(IMAGE).eep
 
 # Default target.
 all: 	begin gccversion \
-	station.hex $(EEP) \
-	test.hex \
+	station \
+	test \
 	size \
-	config \
 	finished end
 
-#	generate_version_info \
+# Base Station Binary
+station: $(IMAGE).hex $(EEP)
 
+# On chip tests
 test: CFLAGS += -DHAS_LCD
 test: test.hex
 
@@ -124,12 +131,6 @@ ifdef WITH_TARGET
   CFLAGS += -DWITH_TARGET
 endif
 
-# Star LEDs in background. Disables low power mode.
-ifdef WITH_BLINKING
-  OBJS += blink.o play_pattern.o
-  CFLAGS += -DWITH_BLINKING
-endif
-
 # Watch dog timer.
 ifdef WITH_WATCHDOG
   CFLAGS += -DWITH_WATCHDOG
@@ -140,27 +141,10 @@ ifdef WITH_FAKE_IDM
   CFLAGS += -DFAKE_IDM
 endif
 
-# Push button feature on PB1 (PCINT1).
-# Base station shuts down after non-use and wakes up by PB1 low.
-ifdef WITH_PUSH_BUTTON
-  CFLAGS += -DWITH_PUSH_BUTTON
-endif
-
-# Blink activity LED, useful for battery powered devices
-ifdef WITH_BLINK_LED
-  CFLAGS += -DWITH_BLINK_LED
-endif
-
 # Reset device if external power is plugged in or out. Useful for device
 # with built-in battery charger.
 ifdef HAS_CHARGER
   CFLAGS += -DHAS_CHARGER
-endif
-
-# The device uses a digital transistor for NFC module power control,
-# meaning the I/O pin has to go high to enable power to the NFC module.
-ifdef HAS_DIGITRANS
-  CFLAGS += -DHAS_DIGITRANS
 endif
 
 # Optional assembler flags.
@@ -245,13 +229,7 @@ end:
 	@echo
 
 size:
-	@avr-size station.elf
-
-config:
-	@cat version_info.auto.h | grep \" | cut -d\" -f2
-
-generate_version_info:
-	./version_gen.py
+	@avr-size $(IMAGE).elf
 
 # Display compiler version information.
 gccversion :
@@ -274,12 +252,8 @@ gccversion :
 # Link: create ELF output file from object files.
 .SECONDARY : $(TARGET).elf
 .PRECIOUS : $(OBJ)
-%.elf: %.o
-	@echo
-	@echo $(MSG_LINKING) $@
-	$(CC) $(ALL_CFLAGS) $< --output $@ $(LDFLAGS)
 
-station.elf: $(OBJS) $(LIB_OBJS)
+$(IMAGE).elf: $(OBJS) $(LIB_OBJS) $(RCS956_OBJS)
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
@@ -309,11 +283,6 @@ test.elf: $(TEST_OBJS) $(LIB_OBJS) $(TARGET_OBJS)
 	$(CC) -c $(ALL_ASFLAGS) $< -o $@
 
 
-base_station.pb.c: base_station.proto
-	@echo
-	@echo $(MSG_ASSEMBLING) $<
-	python protobufs_cc.py -o base_station < $<
-
 # Program Fuses (includes BOD = 2.7V)
 fuse_osc_lo:
 	hidspx -d9 -fL0xCC -fX0xFD
@@ -335,7 +304,6 @@ clean_list :
 	$(REMOVE) $(EEP)
 	$(REMOVE) $(ALL_OBJS)
 	$(REMOVE) $(subst .o,.lst,$(ALL_OBJS))
-	$(REMOVE) base_station.pb.c base_station.pb.h
 
 # Listing of phony targets.
 .PHONY : all begin finish end \
