@@ -118,21 +118,19 @@ void usart_send(uint8_t c)
  */
 void usart_send_buf(const uint8_t* buf, int len)
 {
-  int i;
-  for (i = 0; i < len; i++) {
+  do {
     usart_send(*buf++);
-  }
+  } while (--len);
 }
 
 /*
  * Sends a sequence of bytes from program memory via USART.
  */
-void usart_send_buf_p(const prog_char* buf,int len)
+void usart_send_buf_p(const prog_char* buf, int len)
 {
-  int i;
-  for (i = 0; i < len; i++) {
+  do {
     usart_send(pgm_read_byte(buf++));
-  }
+  } while (--len);
 }
 
 /*
