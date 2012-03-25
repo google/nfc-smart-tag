@@ -31,7 +31,7 @@ RCS956_OBJS = \
        rcs956/rcs956_common.o \
        rcs956/rcs956_initiator.o \
        rcs956/rcs956_protocol.o
-       
+
 PLUG_OBJS = \
        peripheral/three_wire.o \
        rcs801/rcs801.o

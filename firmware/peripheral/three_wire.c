@@ -148,4 +148,3 @@ void twspi_get_buf(uint8_t* buf, uint8_t len)
     *buf++ = twspi_get();
   } while (--len);
 }
-

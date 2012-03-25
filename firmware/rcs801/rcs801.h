@@ -24,3 +24,4 @@
 void rcs801_init(void);
 
 #endif /* __RCS801 */
+
