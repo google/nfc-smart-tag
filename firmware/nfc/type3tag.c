@@ -44,11 +44,6 @@ static const prog_char card_syscode[] = {0x12, 0xfc};
 static const prog_char card_pmm[] = {
   0x01, 0x20, 0x22, 0x04, 0x27, 0x3f, 0x7f, 0xff};
 
-// Compute number of blocks needed to store X bytes. Use shift for efficiency.
-#define BLOCK_SIZE 16
-#define NUM_BLOCKS(X) (((X) + (BLOCK_SIZE - 1)) >> 4)
-#define NUM_BYTES(X) ((X) << 4)
-
 // Extract high and low bytes
 #define L8(x) (x & 0xff)
 #define H8(x) ((x >> 8) & 0xff)
@@ -96,8 +91,7 @@ __check_response_header(uint8_t *buf, uint8_t *id, uint8_t num_blocks)
 /**
  * Compute checksum for the attribute info block.
  */
-static uint16_t
-__attr_checksum(uint8_t *b, int length)
+static uint16_t __attr_checksum(uint8_t *b, int length)
 {
   int i;
   uint16_t cksum = 0;
@@ -108,24 +102,22 @@ __attr_checksum(uint8_t *b, int length)
 }
 
 /*
- * Populates the attribute block for a Type 3 tag as defined in Chapter 6 of
- * NFC Forum Type 3 Tag Operation Technical Specification.
+ * Populates the 16 byte attribute block for a Type 3 tag as defined in 
+ * Chapter 6 of NFC Forum Type 3 Tag Operation Technical Specification.
  *
  * Allows up to 4 blocks to be checked(read) at one time to not exceed
  * our working buffer.
  *
- * Returns: number of bytes written
+ * Returns: number of bytes written (16)
  */
-static uint8_t
-__attribute_block(uint8_t *buf, uint8_t *id, int data_len) {
+uint8_t attribute_block(uint8_t *buf, uint16_t data_len) {
   uint8_t head = 0;
   uint16_t cksum;
 
-  head = __check_response_header(buf, id, 1);
   // 16 bytes data (1 block).
   uint8_t data_pos = head;
   buf[head++] = 0x10; // ver
-  buf[head++] = 0x04; // nbr (# blocks to check)
+  buf[head++] = TYPE3_MAX_NUM_BLOCKS; // nbr (# blocks to check)
   buf[head++] = 0x01; // nbw (# blocks to update)
   buf[head++] = H8(NUM_BLOCKS(data_len)); // # Blocks available
   buf[head++] = L8(NUM_BLOCKS(data_len));
@@ -195,14 +187,14 @@ uint8_t get_type3_response(
     uint8_t *resp,
     uint8_t *cmd,
     uint8_t card_idm[],
-    uint8_t record[], int record_len,
+    uint8_t record[], uint16_t record_len,
     bool *has_read_all)
 {
   uint8_t resp_len = 0;
 
   // Respond to Commands
   switch (cmd[0]) {
-  case 0x00: // Polling (SENF_REQ) Command
+  case FELICA_POLL: // Polling (SENF_REQ) Command
     // 1: Command (0x00)
     // 2/3: System Code
     // 4: Request Code (RC) 0x01: Include syscode
@@ -217,7 +209,7 @@ uint8_t get_type3_response(
     }
     break;
 
-  case 0x06: // Read Without Encryption (Check).
+  case FELICA_READ_WITHOUT_ENCRYPTION: // Read Without Encryption (Check).
     // 0: Command (0x06)
     // 1-8: IDm (8 bytes)
     // 9: Number of Services (usually one)
@@ -230,7 +222,8 @@ uint8_t get_type3_response(
         (cmd[13] == 0x80)) {
       if (cmd[12] == 1 && cmd[14] == 0x00) {
         // Block 0: Attribute Information Block
-        resp_len = __attribute_block(resp, &cmd[1], record_len);
+        resp_len = __check_response_header(resp, &cmd[1], 1);
+        resp_len += attribute_block(&resp[resp_len], record_len);
         lcd_printf(0, "Felica RD Attr");
       } else {
         // Data block: Return requested blocks
