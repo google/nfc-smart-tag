@@ -1,0 +1,7 @@
+# avr-gcc compiled source
+*.o
+*.lst
+*.elf
+*.hex
+*.swp
+
