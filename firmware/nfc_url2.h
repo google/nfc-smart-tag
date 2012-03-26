@@ -24,7 +24,7 @@
 #include <stddef.h>
 
 #ifndef URL
-#define URL "http://www.google.com?nv="
+#define URL "http://www.google.co.jp/m/nfc?nv="
 #undef WITHOUT_V_FIELD
 #endif /* !URL */
 
