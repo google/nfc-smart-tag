@@ -21,10 +21,9 @@
 #ifndef __RCS801_H_
 #define __RCS801
 
-void rcs801_init(void);
+void rcs926_init(void);
 
-void rcs801_process_command(uint8_t ndef[], uint16_t ndef_len,
+void rcs926_process_command(uint8_t ndef[], uint16_t ndef_len,
                             bool *has_read_all);
-
-
+                            
 #endif /* __RCS801 */

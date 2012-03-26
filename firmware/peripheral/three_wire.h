@@ -44,10 +44,11 @@ void twspi_init(void);
 void twspi_disable(void);
 
 // Activate and deactivate (suspend mode)
-void rcs801_suspend(void);
-void rcs801_resume(void);
-bool rcs801_data_ready(void);
-bool rcs801_rf_present(void);
+void rcs926_suspend(void);
+void rcs926_resume(void);
+bool rcs926_data_ready(void);
+bool rcs926_rf_present(void);
+void rcs926_wake_up_on_rf(void);
 
 // Transmit data
 void twspi_begin_send(void);

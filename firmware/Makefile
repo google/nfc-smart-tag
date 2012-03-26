@@ -19,10 +19,11 @@ F_CPU ?= 3580000   	# 3.58 MHz
 # Name of the Hex image to generate
 IMAGE=station
 
-OBJS = \
+STATION_OBJS = \
        eeprom_data.o \
        enc.o \
        initiator.o \
+       nfc/felica_push.o \
        nfc_url2.o \
        proto/base_station.pb.o \
        station_rcs956.o
@@ -32,19 +33,21 @@ RCS956_OBJS = \
        rcs956/rcs956_initiator.o \
        rcs956/rcs956_protocol.o
 
-RCS801_OBJS = \
+RCS926_OBJS = \
+       peripheral/three_wire.o \
+       rcs801/rcs801.o 
+       
+PLUG_OBJS = \
        nfc/sp.o \
        nfc/type3tag.o \
+       peripheral/power_down.o \
        peripheral/sound.o \
-       peripheral/three_wire.o \
-       rcs801/rcs801.o \
-       station_rcs801.o
+       station_rcs801.o              
 
 LIB_OBJS = \
        crypto/avr_aes_enc.o \
        crypto/avr_sha1.o \
        crypto/ws_base64_enc.o \
-       nfc/felica_push.o \
        peripheral/battery.o \
        peripheral/eeprom.o \
        peripheral/led.o \
@@ -53,7 +56,7 @@ LIB_OBJS = \
        peripheral/sound.o \
        peripheral/switch.o \
        peripheral/timer.o \
-       peripheral/usart.o
+       peripheral/usart.o 
 
 TARGET_OBJS = \
        nfc/llcp.o \
@@ -62,6 +65,7 @@ TARGET_OBJS = \
        nfc/type3tag.o
 
 TEST_OBJS= \
+       nfc/felica_push.o \
        peripheral/lcd.o \
        test/all_tests.o \
        test/avr_aes_enc_test.o \
@@ -75,7 +79,10 @@ TEST_OBJS= \
 # Start empty. Objects are added per command line switches
 DEBUG_OBJS =
 
-ALL_OBJS = $(OBJS) $(LIB_OBJS) $(TARGET_OBJS) $(RCS956_OBJS) $(RCS801_OBS) $(TEST_OBJS)
+ALL_OBJS = $(STATION_OBJS) $(PLUG_OBJS) \
+           $(LIB_OBJS) $(TARGET_OBJS) \
+           $(RCS956_OBJS) $(RCS926_OBS) \
+           $(TEST_OBJS)
 
 EEP = $(IMAGE).eep
 
@@ -263,7 +270,7 @@ gccversion :
 .SECONDARY : $(TARGET).elf
 .PRECIOUS : $(OBJ)
 
-$(IMAGE).elf: $(OBJS) $(LIB_OBJS) $(RCS956_OBJS) $(DEBUG_OBJS)
+$(IMAGE).elf: $(STATION_OBJS) $(LIB_OBJS) $(RCS956_OBJS) $(DEBUG_OBJS)
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
@@ -273,7 +280,7 @@ test.elf: $(TEST_OBJS) $(LIB_OBJS) $(TARGET_OBJS)
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
   
-station-plug.elf: $(RCS801_OBJS) $(DEBUG_OBJS)
+station-plug.elf: $(PLUG_OBJS) $(RCS926_OBJS) $(DEBUG_OBJS)
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)

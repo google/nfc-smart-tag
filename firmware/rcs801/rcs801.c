@@ -31,9 +31,10 @@
 #include "rcs801.h"
 
 #define MODE_TYPE3 0x1b
-// C7 should be OK
-#define PMM_READ   0x4F  // (8 + 1 * #blocks) * 4 ^ 3 / (13.56M / 256 / 16)
-#define PMM_WRITE  0x4F  // (8 + 1 * #blocks) * 4 ^ 3 / (13.56M / 256 / 16)
+
+// 0.3ms * ([b2..b0]+1 + num_blocks*([b5..b3]+1)) * 4 ^ [b7..b6]
+#define PMM_READ  0b10011111  // 38.4ms + 19.2ms * #blocks
+#define PMM_WRITE 0b10011111  // 38.4ms + 19.2ms * #blocks 
 
 static const prog_char __init_cmd[] = {
     MODE_TYPE3,
@@ -47,7 +48,10 @@ static const prog_char __init_cmd[] = {
     0x78
 };
 
-void rcs801_init(void)
+/*
+ * Configure the plug as Type 3 Tag.
+ */
+void rcs926_init(void)
 {
   twspi_begin_send();
   twspi_send_buf_p(__init_cmd, sizeof(__init_cmd));
@@ -75,7 +79,7 @@ static uint16_t __read_block_number()
  * Handles only Read Without Encryption. Returns an
  * Attribute block or the appropriate segment of an NDEF record.
  */
-void rcs801_process_command(uint8_t ndef[], uint16_t ndef_len,
+void rcs926_process_command(uint8_t ndef[], uint16_t ndef_len,
                             bool *has_read_all)
 {
   uint8_t cmd;

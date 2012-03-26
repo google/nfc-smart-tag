@@ -43,17 +43,17 @@ void twspi_disable(void)
 }
 
 /*
- * Suspend RC-S801 by pulling SW signal low.
+ * Suspend RC-S926 by pulling SW signal low.
  */
-void rcs801_suspend(void)
+void rcs926_suspend(void)
 {
   TWSPI_PORT &= ~_BV(TWSPI_SW);
 }
 
 /*
- * Activate RC-S801 by pulling SW signal high.
+ * Activate RC-S926 by pulling SW signal high.
  */
-void rcs801_resume(void)
+void rcs926_resume(void)
 {
   TWSPI_PORT |= _BV(TWSPI_SW);
   _delay_us(50);
@@ -62,7 +62,7 @@ void rcs801_resume(void)
 /*
  * Returns true if the Felica plug received data from the initiator.
  */
-bool rcs801_data_ready(void)
+bool rcs926_data_ready(void)
 {
   return (TWSPI_PIN & _BV(TWSPI_IRQ));
 }
@@ -70,9 +70,19 @@ bool rcs801_data_ready(void)
 /*
  * Returns true if an external RF field is detected (pin LOW).
  */
-bool rcs801_rf_present(void)
+bool rcs926_rf_present(void)
 {
   return (TWSPI_PIN & _BV(TWSPI_RFDET)) == 0;
+}
+
+/*
+ * Configure interrupt so that a low edge on RFDET wakes up the controller.
+ */
+void rcs926_wake_up_on_rf(void)
+{
+  // Enable level change on PB5 (PCINT5) to trigger PCINT0
+  PCICR |= _BV(PCIE0);
+  PCMSK0 |= _BV(PCINT5);
 }
 
 /*
