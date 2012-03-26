@@ -82,8 +82,8 @@ EEP = $(IMAGE).eep
 # Default target.
 all: 	begin gccversion \
 	station \
+	plug \
 	test \
-	size \
 	finished end
 
 # Base Station Binary
@@ -92,6 +92,9 @@ station: $(IMAGE).hex $(EEP)
 # On chip tests
 test: CFLAGS += -DHAS_LCD
 test: test.hex
+
+# Felica Plug version
+plug: station-plug.hex
 
 FORMAT = ihex 		# create a .hex file
 
@@ -237,9 +240,6 @@ end:
 	@echo $(MSG_END)
 	@echo
 
-size:
-	@avr-size $(IMAGE).elf
-
 # Display compiler version information.
 gccversion :
 	@$(CC) --version
@@ -250,6 +250,7 @@ gccversion :
 	@echo
 	@echo $(MSG_FLASH) $@
 	$(OBJCOPY) -O $(FORMAT) -R .eeprom $< $@
+	@avr-size $<
 
 %.eep: %.elf
 	@echo
