@@ -45,6 +45,7 @@
 // We are able to provide 4 blocks in one read
 #define TYPE3_MAX_NUM_BLOCKS 4
 
+// FELICA commands we can handle
 #define FELICA_POLL 0x00
 #define FELICA_READ_WITHOUT_ENCRYPTION 0x06
 

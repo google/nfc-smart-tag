@@ -15,7 +15,7 @@
  *
  * Read and write data using a half duplex three-wire interface used
  * by the Felica Plug.
- * 
+ *
  * http://www.sony.net/Products/felica/business/tech-support
  */
 
@@ -42,20 +42,37 @@ void twspi_disable(void)
   TWSPI_DDR &= ~_BV(TWSPI_SEL) & ~_BV(TWSPI_CLK) & ~_BV(TWSPI_SW);
 }
 
+/*
+ * Suspend RC-S801 by pulling SW signal low.
+ */
 void rcs801_suspend(void)
 {
   TWSPI_PORT &= ~_BV(TWSPI_SW);
 }
 
+/*
+ * Activate RC-S801 by pulling SW signal high.
+ */
 void rcs801_resume(void)
 {
   TWSPI_PORT |= _BV(TWSPI_SW);
   _delay_us(50);
 }
 
+/*
+ * Returns true if the Felica plug received data from the initiator.
+ */
 bool rcs801_data_ready(void)
 {
-  return TWSPI_PIN & _BV(TWSPI_IRQ);
+  return (TWSPI_PIN & _BV(TWSPI_IRQ));
+}
+
+/*
+ * Returns true if an external RF field is detected (pin LOW).
+ */
+bool rcs801_rf_present(void)
+{
+  return (TWSPI_PIN & _BV(TWSPI_RFDET)) == 0;
 }
 
 /*
@@ -82,7 +99,7 @@ void twspi_end_send(void)
 }
 
 /*
- * Sends a single byte to the bus, MSB first. 
+ * Sends a single byte to the bus, MSB first.
  * Max specified bus speed is 1 MHz.
  */
 void twspi_send(uint8_t c)
@@ -91,9 +108,9 @@ void twspi_send(uint8_t c)
   do {
     TWSPI_PORT &= ~_BV(TWSPI_CLK);
     if (c & 0x80) {
-      TWSPI_PORT |= _BV(TWSPI_DATA);      
+      TWSPI_PORT |= _BV(TWSPI_DATA);
     } else {
-      TWSPI_PORT &= ~_BV(TWSPI_DATA);      
+      TWSPI_PORT &= ~_BV(TWSPI_DATA);
     }
     c <<= 1;
     _delay_us(1);
@@ -105,17 +122,17 @@ void twspi_send(uint8_t c)
 /*
  * Sends a memory buffer to the bus.
  */
-void twspi_send_buf(const uint8_t* buf, uint8_t len)
+void twspi_send_buf(const uint8_t *buf, uint8_t len)
 {
   do {
     twspi_send(*buf++);
   } while (--len);
 }
 
-void twspi_send_buf_p(const prog_char* buf, uint8_t len)
+void twspi_send_buf_p(const prog_char *buf, uint8_t len)
 {
   do {
-    pgm_read_byte(buf++);
+    twspi_send(pgm_read_byte(buf++));
   } while (--len);
 }
 

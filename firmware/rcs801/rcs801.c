@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <avr/pgmspace.h>
 #include <util/delay.h>
 
 #include "../nfc/type3tag.h"
@@ -30,35 +31,36 @@
 #include "rcs801.h"
 
 #define MODE_TYPE3 0x1b
-#define PMM_READ   0xC7  // (8 + 1 * #blocks) * 4 ^ 3 / (13.56M / 256 / 16) 
-#define PMM_WRITE  0xC7  // (8 + 1 * #blocks) * 4 ^ 3 / (13.56M / 256 / 16)
+// C7 should be OK
+#define PMM_READ   0x4F  // (8 + 1 * #blocks) * 4 ^ 3 / (13.56M / 256 / 16)
+#define PMM_WRITE  0x4F  // (8 + 1 * #blocks) * 4 ^ 3 / (13.56M / 256 / 16)
 
 static const prog_char __init_cmd[] = {
-    MODE_TYPE3, 
+    MODE_TYPE3,
     PMM_READ,
     PMM_WRITE,
-    0x12,  // Data Format Code (IDM[2-3])
+    0x00,  // Data Format Code (IDM[2-3])
+    0x1C,
+    0x12,  // User defined (IDM[4-7]
     0x34,
-    0x01,  // User defined (IDM[4-7]
-    0x02,
-    0x03,
-    0x04
-    };
+    0x56,
+    0x78
+};
 
 void rcs801_init(void)
 {
   twspi_begin_send();
   twspi_send_buf_p(__init_cmd, sizeof(__init_cmd));
-  twspi_begin_send();
+  twspi_end_send();
 }
 
 /*
  * Read 2 byte or 3 byte block number (little endian)
  */
-static uint16_t __read_block_number() 
+static uint16_t __read_block_number()
 {
   uint8_t b;
-  
+
   b = twspi_get();
   if (b & 0x80) {
     return twspi_get();
@@ -73,7 +75,8 @@ static uint16_t __read_block_number()
  * Handles only Read Without Encryption. Returns an
  * Attribute block or the appropriate segment of an NDEF record.
  */
-void rcs801_process_command(uint8_t ndef[], uint16_t ndef_len, bool *has_read_all)
+void rcs801_process_command(uint8_t ndef[], uint16_t ndef_len,
+                            bool *has_read_all)
 {
   uint8_t cmd;
   uint8_t num_blocks;
@@ -91,15 +94,14 @@ void rcs801_process_command(uint8_t ndef[], uint16_t ndef_len, bool *has_read_al
 
     for (i = 0; i < num_blocks; i++) {
       uint16_t block_num = __read_block_number();
-      lcd_printf(1, "Felica RD %i", block_num); 
+      lcd_printf(1, "Felica RD %i %i", block_num, num_blocks);
       if (block_num == 0) {
         attribute_block(data, ndef_len);
-      }
-      if (block_num > NUM_BLOCKS(ndef_len)) {
+      } else if (block_num > NUM_BLOCKS(ndef_len)) {
         memset(data, 0, BLOCK_SIZE);
       } else {
         uint8_t offset = NUM_BYTES(block_num - 1);
-        uint8_t num_bytes;        
+        uint8_t num_bytes;
         if (block_num == NUM_BLOCKS(ndef_len)) {
           num_bytes = ndef_len - offset;
           *has_read_all = true;
@@ -117,7 +119,7 @@ void rcs801_process_command(uint8_t ndef[], uint16_t ndef_len, bool *has_read_al
     twspi_begin_send();
     twspi_send(0x00);  // status
     twspi_send(0x00);
-    twspi_send_buf(block_data, num_blocks * 16);
+    twspi_send_buf(block_data, data - block_data);
     twspi_end_send();
   }
 }

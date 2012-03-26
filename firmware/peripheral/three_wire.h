@@ -14,9 +14,9 @@
  * limitations under the License.
  *
  * Read and write data using a half duplex three-wire interface used
- * by the Felica Plug. This interface is similar to SPI, but uses only a 
+ * by the Felica Plug. This interface is similar to SPI, but uses only a
  * single data line.
- * 
+ *
  * http://www.sony.net/Products/felica/business/tech-support
  */
 
@@ -31,12 +31,13 @@
 #define TWSPI_PORT PORTB
 #define TWSPI_DDR DDRB
 #define TWSPI_PIN PINB
-#define TWSPI_DATA PB0  // Data (in-out)
+
+#define TWSPI_SW PB0  // Stand by (L) (out) - shared with LED
 #define TWSPI_CLK PB1  // Clock (out)
-#define TWSPI_SEL PB2  // Read(H)-Write(L) (out)
-#define TWSPI_SW PB3  // Stand by (L) (out)
-#define TWSPI_RFDET PB4  // RF Signal detected (L) (in)
-#define TWSPI_IRQ PB5  // Data ready (H) (in)
+#define TWSPI_DATA PB2  // Data (in-out)
+#define TWSPI_SEL PB3  // Read(H)-Write(L) (out)
+#define TWSPI_IRQ PB4  // Data ready (H) (in)
+#define TWSPI_RFDET PB5  // RF Signal detected (L) (in)
 
 // Setup
 void twspi_init(void);
@@ -46,6 +47,7 @@ void twspi_disable(void);
 void rcs801_suspend(void);
 void rcs801_resume(void);
 bool rcs801_data_ready(void);
+bool rcs801_rf_present(void);
 
 // Transmit data
 void twspi_begin_send(void);

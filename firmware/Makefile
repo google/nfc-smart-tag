@@ -32,9 +32,13 @@ RCS956_OBJS = \
        rcs956/rcs956_initiator.o \
        rcs956/rcs956_protocol.o
 
-PLUG_OBJS = \
+RCS801_OBJS = \
+       nfc/sp.o \
+       nfc/type3tag.o \
+       peripheral/sound.o \
        peripheral/three_wire.o \
-       rcs801/rcs801.o
+       rcs801/rcs801.o \
+       station_rcs801.o
 
 LIB_OBJS = \
        crypto/avr_aes_enc.o \
@@ -68,7 +72,10 @@ TEST_OBJS= \
        test/test.o \
        test/ws_base64_enc_test.o
 
-ALL_OBJS = $(OBJS) $(LIB_OBJS) $(TARGET_OBJS) $(RCS956_OBJS) $(TEST_OBJS)
+# Start empty. Objects are added per command line switches
+DEBUG_OBJS =
+
+ALL_OBJS = $(OBJS) $(LIB_OBJS) $(TARGET_OBJS) $(RCS956_OBJS) $(RCS801_OBS) $(TEST_OBJS)
 
 EEP = $(IMAGE).eep
 
@@ -125,7 +132,7 @@ endif
 
 # LCD is off by default.
 ifdef HAS_LCD
-  OBJS += peripheral/lcd.o
+  DEBUG_OBJS += peripheral/lcd.o
   CFLAGS += -DHAS_LCD
 endif
 
@@ -255,7 +262,7 @@ gccversion :
 .SECONDARY : $(TARGET).elf
 .PRECIOUS : $(OBJ)
 
-$(IMAGE).elf: $(OBJS) $(LIB_OBJS) $(RCS956_OBJS)
+$(IMAGE).elf: $(OBJS) $(LIB_OBJS) $(RCS956_OBJS) $(DEBUG_OBJS)
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
@@ -265,7 +272,7 @@ test.elf: $(TEST_OBJS) $(LIB_OBJS) $(TARGET_OBJS)
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
   
-plug.elf: $(LIB_OBJS) $(PLUG_OBJS) $(TARGET_OBJS)
+station-plug.elf: $(RCS801_OBJS) $(DEBUG_OBJS)
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)

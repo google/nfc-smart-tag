@@ -102,7 +102,7 @@ static uint16_t __attr_checksum(uint8_t *b, int length)
 }
 
 /*
- * Populates the 16 byte attribute block for a Type 3 tag as defined in 
+ * Populates the 16 byte attribute block for a Type 3 tag as defined in
  * Chapter 6 of NFC Forum Type 3 Tag Operation Technical Specification.
  *
  * Allows up to 4 blocks to be checked(read) at one time to not exceed
@@ -117,7 +117,9 @@ uint8_t attribute_block(uint8_t *buf, uint16_t data_len) {
   // 16 bytes data (1 block).
   uint8_t data_pos = head;
   buf[head++] = 0x10; // ver
-  buf[head++] = TYPE3_MAX_NUM_BLOCKS; // nbr (# blocks to check)
+  buf[head++] = // nbr (# blocks to check)
+                (NUM_BLOCKS(data_len) < TYPE3_MAX_NUM_BLOCKS) ?
+                 NUM_BLOCKS(data_len) : TYPE3_MAX_NUM_BLOCKS;
   buf[head++] = 0x01; // nbw (# blocks to update)
   buf[head++] = H8(NUM_BLOCKS(data_len)); // # Blocks available
   buf[head++] = L8(NUM_BLOCKS(data_len));
