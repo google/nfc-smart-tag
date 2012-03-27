@@ -61,7 +61,14 @@ typedef struct {
   /* Add new fields here */
 } stats_t;
 
-static stats_t __attribute__((section(".eeprom"))) stats;
+// A valid default station and ID and key.
+// Please change this to your own values.
+static stats_t __attribute__((section(".eeprom"))) stats = {
+  .has_station_info = CONFIG_MARKER,
+  .station_id = { 0xFF, 0xFF, 0xFF, 0xFF, 0x12, 0x34, 0x56, 0x78 },
+  .station_key = { 0x49, 0x9E, 0x81, 0xCB, 0x6B, 0xDC, 0x1B, 0xC6,
+                   0x24, 0x55, 0x3A, 0x01, 0xB3, 0x0E, 0x7F, 0x46 },
+};
 
 /*
  * Increases counters based on reset status flags.
