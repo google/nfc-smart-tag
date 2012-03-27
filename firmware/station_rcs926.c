@@ -17,6 +17,9 @@
  * e.g. RC-S801 or RC-S802 Felica Plug
  *
  * http://www.sony.net/Products/felica/business/tech-support
+ *
+ * Battery consumption in standby mode is ~0.2uA, allowing this to run
+ * a long time off a 3V cell battery, e.g. CR2032
  */
 
 #include <string.h>
@@ -35,13 +38,9 @@
 #include "peripheral/three_wire.h"
 #include "rcs926/rcs926.h"
 
-#define PLUG_URL "http://www.google.com?q=nfc"
-
-static bool make_url(uint8_t *buf,
-                     __attribute__((unused)) uint8_t buf_size,
+static bool make_url(uint8_t *buf, uint8_t buf_size,
                      __attribute__((unused)) void* extra) {
-  strcpy((char *)buf, PLUG_URL);
-  return strlen(PLUG_URL);
+  return build_url((char *)buf, buf_size, NULL);
 }
 
 static void sleep_until_melody_completes(void)
@@ -106,7 +105,7 @@ int main() {
                         sizeof(melody_googlenfc001) / sizeof(struct note));
             sleep_until_melody_completes();
             lcd_puts(0, "success");
-            // Melody is long enough to complete transfer
+            // Melody is long enough to complete transfer. Go back to sleep.
             break;
           }
         } else {

@@ -29,6 +29,8 @@ STATION_OBJS = \
        station_rcs956.o
 
 RCS956_OBJS = \
+       peripheral/module_power.o \
+       peripheral/usart.o \
        rcs956/rcs956_common.o \
        rcs956/rcs956_initiator.o \
        rcs956/rcs956_protocol.o
@@ -38,10 +40,12 @@ RCS926_OBJS = \
        rcs926/rcs926.o
 
 PLUG_OBJS = \
+       eeprom_data.o \
+       enc.o \
+       nfc_url2.o \
        nfc/sp.o \
        nfc/type3tag.o \
-       peripheral/power_down.o \
-       peripheral/sound.o \
+       proto/base_station.pb.o \
        station_rcs926.o
 
 LIB_OBJS = \
@@ -51,12 +55,10 @@ LIB_OBJS = \
        peripheral/battery.o \
        peripheral/eeprom.o \
        peripheral/led.o \
-       peripheral/module_power.o \
        peripheral/power_down.o \
        peripheral/sound.o \
        peripheral/switch.o \
-       peripheral/timer.o \
-       peripheral/usart.o
+       peripheral/timer.o
 
 TARGET_OBJS = \
        nfc/llcp.o \
@@ -280,7 +282,7 @@ test.elf: $(TEST_OBJS) $(LIB_OBJS) $(TARGET_OBJS)
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
   
-station-plug.elf: $(PLUG_OBJS) $(RCS926_OBJS) $(DEBUG_OBJS)
+station-plug.elf: $(PLUG_OBJS) $(LIB_OBJS) $(RCS926_OBJS) $(DEBUG_OBJS)
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(CC) $(ALL_CFLAGS) $^ --output $@ $(LDFLAGS)
