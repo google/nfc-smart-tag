@@ -76,15 +76,32 @@ bool rcs926_rf_present(void)
 }
 
 /*
- * Configure interrupt so that a low edge on RFDET wakes up the controller.
+ * Wake up the controller on change on RFDEF (RF Detected) via interrupt
  */
-void rcs926_wake_up_on_rf(void)
+void rcs926_wake_up_on_rf(bool enable)
 {
-  // Enable level change on PB5 (PCINT5) to trigger PCINT0
-  PCICR |= _BV(PCIE0);
-  PCMSK0 |= _BV(PCINT5);
+  if (enable) {
+    // Enable level change on PB5 (PCINT5) to trigger PCINT0
+    PCICR |= _BV(PCIE0);
+    PCMSK0 |= _BV(PCINT5);
+  } else {
+    PCMSK0 &= ~_BV(PCINT5);
+  }
 }
 
+/*
+ * Wake up the controlleron change on IRQ (Data ready) via interrupt
+ */
+void rcs926_wake_up_on_irq(bool enable)
+{
+  if (enable) {
+    // Enable level change on PB4 (PCINT4) to trigger PCINT0
+    PCICR |= _BV(PCIE0);
+    PCMSK0 |= _BV(PCINT4);
+  } else {
+    PCMSK0 &= ~_BV(PCINT4);
+  }
+}
 /*
  * Set SEL pin to low to indicate data transfer from the host and
  * configures the DATA pin as output.

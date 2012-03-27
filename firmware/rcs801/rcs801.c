@@ -34,7 +34,7 @@
 
 // 0.3ms * ([b2..b0]+1 + num_blocks*([b5..b3]+1)) * 4 ^ [b7..b6]
 #define PMM_READ  0b10011111  // 38.4ms + 19.2ms * #blocks
-#define PMM_WRITE 0b10011111  // 38.4ms + 19.2ms * #blocks 
+#define PMM_WRITE 0b10011111  // 38.4ms + 19.2ms * #blocks
 
 static const prog_char __init_cmd[] = {
     MODE_TYPE3,

@@ -48,7 +48,8 @@ void rcs926_suspend(void);
 void rcs926_resume(void);
 bool rcs926_data_ready(void);
 bool rcs926_rf_present(void);
-void rcs926_wake_up_on_rf(void);
+void rcs926_wake_up_on_rf(bool enable);
+void rcs926_wake_up_on_irq(bool enable);
 
 // Transmit data
 void twspi_begin_send(void);
