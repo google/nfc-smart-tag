@@ -71,7 +71,8 @@ int main() {
   lcd_printf(0, "URL %iB", ndef_len);
 
   beep_n_times(2);
-  
+  sleep_until_melody_completes();
+
   // Wake up if RF field detected
   rcs926_wake_up_on_rf();
   disable_unused_circuits();
