@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Emulate a NFC Smart Tag using a Felica Plug with RC-S926 Chip
+ * Emulate a NFC Smart Tag using a Felica Plug with RC-S926 Chip,
+ * e.g. RC-S801 or RC-S802 Felica Plug
  *
  * http://www.sony.net/Products/felica/business/tech-support
  */
@@ -32,7 +33,7 @@
 #include "peripheral/power_down.h"
 #include "peripheral/sound.h"
 #include "peripheral/three_wire.h"
-#include "rcs801/rcs801.h"
+#include "rcs926/rcs926.h"
 
 #define PLUG_URL "http://www.google.com?q=nfc"
 

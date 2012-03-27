@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Routines to Communicate with RC-S801/RC-S802 Felica Plug
+ * Routines to Communicate with RC-S926 chip in RC-S801/RC-S802 Felica Plug
  *
  * http://www.sony.net/Products/felica/business/tech-support
  */
@@ -28,7 +28,7 @@
 #include "../peripheral/lcd.h"
 #include "../peripheral/three_wire.h"
 
-#include "rcs801.h"
+#include "rcs926.h"
 
 #define MODE_TYPE3 0x1b
 

@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Routines to Communicate with RC-S801/RC-S802 Felica Plug
+ * Routines to Communicate with RC-S926 chip in RC-S801/RC-S802 Felica Plug
  *
  * http://www.sony.net/Products/felica/business/tech-support
  */
 
-#ifndef __RCS801_H_
-#define __RCS801
+#ifndef __RCS926_H_
+#define __RCS926
 
 void rcs926_init(void);
 
 void rcs926_process_command(uint8_t ndef[], uint16_t ndef_len,
                             bool *has_read_all);
-                            
-#endif /* __RCS801 */
+
+#endif /* __RCS926 */

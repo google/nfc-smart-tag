@@ -35,14 +35,14 @@ RCS956_OBJS = \
 
 RCS926_OBJS = \
        peripheral/three_wire.o \
-       rcs801/rcs801.o 
-       
+       rcs926/rcs926.o
+
 PLUG_OBJS = \
        nfc/sp.o \
        nfc/type3tag.o \
        peripheral/power_down.o \
        peripheral/sound.o \
-       station_rcs801.o              
+       station_rcs926.o
 
 LIB_OBJS = \
        crypto/avr_aes_enc.o \
@@ -56,7 +56,7 @@ LIB_OBJS = \
        peripheral/sound.o \
        peripheral/switch.o \
        peripheral/timer.o \
-       peripheral/usart.o 
+       peripheral/usart.o
 
 TARGET_OBJS = \
        nfc/llcp.o \
