@@ -1,0 +1,12 @@
+// Copyright 2012 Google Inc. All Rights Reserved.
+syntax = "proto2";
+
+message NfcSmartTagInfo {
+  optional uint32 number_serial_failure = 1;
+  optional uint32 number_watchdog = 2;
+  optional uint32 number_brown_out = 3;
+  optional uint32 number_external_reset = 4;
+  optional uint32 number_power_reset = 5;
+  // Voltage = 256 / battery_voltage * 1.1
+  optional uint32 battery_voltage = 6;
+}
