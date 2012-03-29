@@ -53,6 +53,9 @@ static void sleep_until_melody_completes(void)
   }
 }
 
+/*
+ * Main routine to emulate a Type 3 tag.
+ */
 int main() {
   uint8_t ndef[128];
   uint8_t ndef_len;
@@ -86,12 +89,13 @@ int main() {
       lcd_puts(0, "resume");
       rcs926_resume();
       rcs926_init();
+      // Configure to wake up on data ready (IRQ)
       rcs926_wake_up_on_rf(false);
       rcs926_wake_up_on_irq(true);
 
       uint8_t loop = 1;
       do {
-        // Wakes up on timeout (584ms) or data ready interrupt (IRQ)
+        // Sleep until timeout (584ms) or data ready (IRQ)
         sleep_until_timer(SLEEP_MODE_PWR_SAVE, true);
 
         // If we have data, process the command
@@ -116,4 +120,5 @@ int main() {
       } while (loop);
     }
   }
+  return 0;  // unreachable
 }

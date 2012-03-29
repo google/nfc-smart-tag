@@ -42,7 +42,7 @@ static const prog_char __init_cmd[] = {
     PMM_WRITE,
     0x00,  // Data Format Code (IDM[2-3])
     0x1C,
-    0x12,  // User defined (IDM[4-7]
+    0x12,  // User defined (IDM[4-7])
     0x34,
     0x56,
     0x78
@@ -86,6 +86,8 @@ void rcs926_process_command(uint8_t ndef[], uint16_t ndef_len,
   uint8_t num_blocks;
   uint8_t block_data[64]; // max 4 blocks
   uint8_t *data = block_data;
+  uint8_t status1 = 0;
+  uint8_t status2 = 0;
 
   cmd = twspi_get();
   if (cmd == FELICA_READ_WITHOUT_ENCRYPTION) {
@@ -93,36 +95,36 @@ void rcs926_process_command(uint8_t ndef[], uint16_t ndef_len,
 
     num_blocks = twspi_get();
     if (num_blocks > TYPE3_MAX_NUM_BLOCKS) {
-      num_blocks = TYPE3_MAX_NUM_BLOCKS;
-    }
-
-    for (i = 0; i < num_blocks; i++) {
-      uint16_t block_num = __read_block_number();
-      lcd_printf(1, "Felica RD %i %i", block_num, num_blocks);
-      if (block_num == 0) {
-        attribute_block(data, ndef_len);
-      } else if (block_num > NUM_BLOCKS(ndef_len)) {
-        memset(data, 0, BLOCK_SIZE);
-      } else {
-        uint8_t offset = NUM_BYTES(block_num - 1);
-        uint8_t num_bytes;
-        if (block_num == NUM_BLOCKS(ndef_len)) {
-          num_bytes = ndef_len - offset;
-          *has_read_all = true;
-          // Extra bytes in last block are ignored, but we wipe to not
-          // leak any data. Just fill whole block to reduce code size.
-          memset(data, 0x00, BLOCK_SIZE);
+      status1 = 0xFF;
+    } else {
+      for (i = 0; i < num_blocks; i++) {
+        uint16_t block_num = __read_block_number();
+        lcd_printf(1, "Felica RD %i %i", block_num, num_blocks);
+        if (block_num == 0) {
+          attribute_block(data, ndef_len);
+        } else if (block_num > NUM_BLOCKS(ndef_len)) {
+          memset(data, 0, BLOCK_SIZE);
         } else {
-          num_bytes = BLOCK_SIZE;
+          uint8_t offset = NUM_BYTES(block_num - 1);
+          uint8_t num_bytes;
+          if (block_num == NUM_BLOCKS(ndef_len)) {
+            num_bytes = ndef_len - offset;
+            *has_read_all = true;
+            // Extra bytes in last block are ignored, but we wipe to not
+            // leak any data. Just fill whole block to reduce code size.
+            memset(data, 0x00, BLOCK_SIZE);
+          } else {
+            num_bytes = BLOCK_SIZE;
+          }
+          memcpy(data, &ndef[offset], num_bytes);
         }
-        memcpy(data, &ndef[offset], num_bytes);
+        data += BLOCK_SIZE;
       }
-      data += BLOCK_SIZE;
     }
 
     twspi_begin_send();
-    twspi_send(0x00);  // status
-    twspi_send(0x00);
+    twspi_send(status1);
+    twspi_send(status2);
     twspi_send_buf(block_data, data - block_data);
     twspi_end_send();
   }
