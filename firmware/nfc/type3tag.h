@@ -34,8 +34,21 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 
+// Compute number of blocks needed to store X bytes. Use shift for efficiency.
+#define BLOCK_SIZE 16
+#define NUM_BLOCKS(X) (((X) + (BLOCK_SIZE - 1)) >> 4)
+#define NUM_BYTES(X) ((X) << 4)
+
 // Enough for 4 data blocks of 16 bytes each + header
 #define TYPE3_BUFFER_SIZE 100
+
+// We are able to provide 4 blocks in one read
+#define TYPE3_MAX_NUM_BLOCKS 4
+
+// FELICA commands we can handle
+#define FELICA_POLL 0x00
+#define FELICA_READ_WITHOUT_ENCRYPTION 0x06
+
 
 // Returns the 2 byte syscode for a Type 3 Card
 const prog_char *get_card_syscode(void);
@@ -43,12 +56,15 @@ const prog_char *get_card_syscode(void);
 // Returns the 8 byte PMM for a Type 3 Card
 const prog_char *get_card_pmm(void);
 
+// Fills a buffer with the attrbute block
+uint8_t attribute_block(uint8_t *buf, uint16_t data_len);
+
 // Determines the response to a Type 3 command received from initiator
 uint8_t get_type3_response(
     uint8_t *resp,
     uint8_t *cmd,
     uint8_t card_idm[],
-    uint8_t record[], int record_len,
+    uint8_t record[], uint16_t record_len,
     bool *has_read_all);
 
 #endif  // NFC_TYPE3TAG_H_
