@@ -24,7 +24,7 @@
 #include <stddef.h>
 
 #ifndef URL
-#define URL "http://www.google.co.jp/m/nfc?nv="
+#define URL "http://nfc-smart-tag.appspot.com/nfc?nv="
 #undef WITHOUT_V_FIELD
 #endif /* !URL */
 
