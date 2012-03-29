@@ -253,7 +253,7 @@ int main(void)
     // Loop here to not skip watchdog timer
     for (loop = 0; loop < TARGET_MODE_RETRY; loop++) {
       watchdog_reset();
-      (void)pasori_reset();
+      (void)rcs956_reset();
       enum target_res res = target(PUSH_URL_LABEL_ENGLISH);
       if (res == TGT_COMPLETE) {
         reset_idle();
@@ -265,7 +265,7 @@ int main(void)
       } // loop on TGT_RETRY
     }
     led_off();
-    (void)pasori_reset();
+    (void)rcs956_reset();
     low_battery_check();
 #else /* !WITH_TARGET */
     // Check battery level while RF field is still on
