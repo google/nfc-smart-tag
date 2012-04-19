@@ -41,7 +41,7 @@ static const prog_char __init_cmd[] = {
     PMM_READ,
     PMM_WRITE,
     0x00,  // Data Format Code (IDM[2-3])
-    0x1C,
+    0x3f,
     0x12,  // User defined (IDM[4-7])
     0x34,
     0x56,
