@@ -202,9 +202,13 @@ static void low_battery_check(void)
 int main(void)
 {
   disable_unused_circuits();
+  _delay_ms(50);
+
+#ifdef HAS_CHARGER
+  reset_on_power_change();
+#endif /* HAS_CHARGER */
 
   /* Shut off right away if battery is very low. Do not power on NFC module */
-  _delay_ms(50);
   adc_init();
   (void)read_voltage();
   // Read one more time in case first reading is corrupted
@@ -221,6 +225,11 @@ int main(void)
   // Initialize and self-test
   module_power_up();
   led_on();
+#ifdef WITH_TARGET
+  // We may have come out of target power down mode
+  //(void)pasori_wake_up();
+#endif
+
   while (!rcs956_reset()) {};
 
   if (!eeprom_has_station_info()) {
@@ -236,9 +245,6 @@ int main(void)
   }
   led_off();
   initiator_set_defaults();
-#ifdef HAS_CHARGER
-  reset_on_power_change();
-#endif /* HAS_CHARGER */
   watchdog_start();
 
   for (;;) {
