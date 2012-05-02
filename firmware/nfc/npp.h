@@ -14,23 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * See http://www.nfc-forum.org/specs/spec_list/
+ *
+ * Support for NPP (NDEF Push Protocol).
+ *
+ * See source.android.com/compatibility/ndef-push-protocol.pdf
  */
 
-#ifndef NFC_SNEP_H_
-#define NFC_SNEP_H_
+#ifndef NFC_NPP_H_
+#define NFC_NPP_H_
 
-#include <avr/io.h>
+#include <stdint.h>
 
-// Response packet status codes
-#define SNEP_RESP_CONTINUE 0x80
-#define SNEP_RESP_SUCCESS 0x81
-#define SNEP_RESP_BAD_REQ 0xC2
+#include "avr/pgmspace.h"
 
-// Writes a SNEP PUT command for a payload of up to 255 bytes.
-uint8_t snep_put(uint8_t *buf, uint8_t *ndef, uint8_t ndef_len);
+// Fills a buffer with the LLCP service name for NPP, including \0.
+prog_char *get_npp_service_name(void);
 
-// Returns the status byte of a SNEP response message.
-uint8_t snep_response_status(uint8_t *buf);
+// Creates an NPP command from a single NDEF record.
+uint8_t npp(uint8_t *buf, uint8_t *ndef, uint8_t ndef_len);
 
-#endif  // NFC_SNEP_H_
+#endif  // NFC_NPP_H_
