@@ -42,7 +42,7 @@ static const prog_char card_syscode[] = {0x12, 0xfc};
 // Sample card PMm w/ check wait of 2.4ms + 2.4ms/block
 // See Section 2.3.1.2 of Type 3 Tag Operation
 static const prog_char card_pmm[] = {
-  0x01, 0x20, 0x22, 0x04, 0x27, 0x3f, 0x7f, 0xff};
+    0x01, 0x20, 0x22, 0x04, 0x27, 0x3f, 0x7f, 0xff};
 
 // Extract high and low bytes
 #define L8(x) (x & 0xff)
@@ -53,18 +53,6 @@ static const prog_char card_pmm[] = {
 
 // First byte is length, payload starts with next byte.
 #define OFS_PAYLOAD OFS_DATA+1
-
-// Returns the 2 byte syscode for a Type 3 Card
-const prog_char *get_card_syscode(void)
-{
-  return card_syscode;
-}
-
-// Returns the 8 byte PMM for a Type 3 Card
-const prog_char *get_card_pmm(void)
-{
-  return card_pmm;
-}
 
 /*
  * Writes the command header for a Type 3 Tag Check (Read without Encryption)

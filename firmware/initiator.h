@@ -27,7 +27,7 @@
 #define NUM_RETRY_COMM 0
 #define NUM_RETRY_INITIATOR_LOOP 5
 #define TIMEOUT_STYLE 0x0d /* 50 * 2^(TIMEOUT_STYLE) [us] i.e. ~400ms*/
-#define COMM_TIMEOUT_MS 1000
+#define IN_COMM_TIMEOUT_MS 1000
 
 // Main initiator feature. Pools for phone and pushes URL.
 bool initiator(const char push_label[]);

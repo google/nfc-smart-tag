@@ -27,13 +27,8 @@
 
 #include "rcs956_initiator.h"
 
-#define L8(x) ((x) & 0xff)
-#define H8(x) (((x) >> 8) & 0xff)
-
 #define CMD 0xd4
 #define RF_CONFIG 0x32
-#define COMM_THRU 0x42
-#define COMM_THRU_EX 0xa0
 #define LIST_TGT 0x4a
 
 /**
@@ -122,60 +117,6 @@ bool initiator_poll(uint8_t idm[], uint8_t pmm[], uint16_t syscode)
     memcpy(pmm, &resp[0x13], 8);
 
   return true;
-}
-
-/*
- * Sends data to the NFC module and receives a response.
- *
- * Parameters:
- *   payload: Felica push command
- *   payload_len: Length of Felica Push command
- *   resp: Response buffer
- *   resp_len: Size of response buffer
- *   timeout: timeout limit in ms (max 30000)
- *
- * Returns:
- *   Length of received payload data
- */
-int initiator_command(uint8_t *payload, size_t payload_len,
-                      uint8_t *resp, size_t resp_len,
-                      uint16_t timeout)
-{
-  static const prog_char __cmd[] = {CMD, COMM_THRU_EX};
-
-  uint8_t cmd[MAX_SEND_SIZE];
-  uint8_t *idx = cmd;
-
-  if (payload_len > sizeof(cmd) - sizeof(__cmd)) {
-    protocol_errno = BUFFER_EXCEEDED;
-    return 0;
-  }
-
-  memcpy_P(cmd, __cmd, sizeof(__cmd));
-  idx += sizeof(__cmd);
-  // Time-out in 0.5ms increments (multiply by 2 with left shift)
-  *idx++ = L8(timeout << 1);
-  *idx++ = H8(timeout << 1);
-  memcpy(idx, payload, payload_len);
-  idx += payload_len;
-
-  if (!rcs956_send_command(cmd, idx - cmd)) {
-    lcd_printf(0, "ctex send fail");
-    return 0;
-  }
-
-  if (!rcs956_read_response(resp, resp_len)) {
-    lcd_printf(0, "ctex resp fail %d", resp[OFS_DATA_LEN]);
-    return 0;
-  }
-
-  if (resp[OFS_DATA] != 0x00) { // First byte is status
-    lcd_printf(0, "ctex st fail %02X", resp[OFS_DATA]);
-    protocol_errno = UNEXPECTED_REPLY;
-    return 0;
-  }
-
-  return resp[OFS_DATA_LEN];
 }
 
 /*

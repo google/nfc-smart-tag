@@ -50,7 +50,7 @@ static uint8_t __checksum_base(const uint8_t *data, size_t len)
 }
 
 /*
- * Read response from RC-S620/S. Waits max of USART_READ_TIMEOUT before
+ * Reads response from RC-S620/S. Waits max of USART_READ_TIMEOUT before
  * timing out.
  *
  * Arguments:
@@ -111,7 +111,7 @@ static size_t __read_response(uint8_t *resp_buffer, size_t resp_buffer_size)
 }
 
 /**
- * Send a command to Felica module. Wait max of USART_READ_TIMEOUT for ACK
+ * Sends a command to Felica module. Waits max of USART_READ_TIMEOUT for ACK
  * from module before timing out and returning an error.
  *
  * Arguments:
@@ -165,7 +165,7 @@ bool rcs956_send_command(const uint8_t *cmd, size_t cmd_len)
 }
 
 /**
- * Send a command to Felica module. Wait max of USART_READ_TIMEOUT for ACK
+ * Sends a command to Felica module. Wait max of USART_READ_TIMEOUT for ACK
  * from module before timing out and returning an error.
  *
  * Arguments:
@@ -191,21 +191,9 @@ bool rcs956_send_command_p(const prog_char *cmd, size_t cmd_len)
  * 0x07 -- size + 0x4: payload
  * size + 0x05: checksum
  * size + 0x06: 0x00
- *
- * payload:
- * - polling
- *   0x07 -- 0x09: ???
- *   0x0a: 0x01 if succeeded
- *   0x0b -- 0x12: IDm
- *   0x13 -- 0x1a: PMm
- * - others:
- *   0x07 -- 0x08: ???
- *   0x09: answer command (usually request command number + 1)
- *   0x0a -- 0x11: IDm
  */
 bool rcs956_read_response(uint8_t *resp_buffer, size_t resp_buffer_size)
 {
-  // The real response
   /* 00 00 ff len csum d4 cmd status payload(>=0) csum 00 */
   size_t resp_size = __read_response(resp_buffer, resp_buffer_size);
   if (resp_size == 0) { /* __read_response failed */
@@ -219,7 +207,7 @@ bool rcs956_read_response(uint8_t *resp_buffer, size_t resp_buffer_size)
 }
 
 /**
- * Send ACK to Felica module, which cancels any pending command. Flushes the
+ * Sends ACK to Felica module, which cancels any pending command. Flushes the
  * receive buffer because the RC-S620 may transmit data while we send the
  * ACK.
  *

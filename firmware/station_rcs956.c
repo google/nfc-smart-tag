@@ -36,6 +36,8 @@
 #include "rcs956/rcs956_common.h"
 #include "rcs956/rcs956_initiator.h"
 #include "rcs956/rcs956_protocol.h"
+#include "target.h"
+
 
 // Milliseconds delay between polling. Rough time for one main loop.
 #define SLEEP_AFTER_TIMEOUT 500
@@ -262,7 +264,6 @@ int main(void)
       (void)rcs956_reset();
       enum target_res res = target(PUSH_URL_LABEL_ENGLISH);
       if (res == TGT_COMPLETE) {
-        reset_idle();
         led_off();
         play_url_push_success_song_and_wait();
         break;

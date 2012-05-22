@@ -49,14 +49,7 @@
 #define FELICA_POLL 0x00
 #define FELICA_READ_WITHOUT_ENCRYPTION 0x06
 
-
-// Returns the 2 byte syscode for a Type 3 Card
-const prog_char *get_card_syscode(void);
-
-// Returns the 8 byte PMM for a Type 3 Card
-const prog_char *get_card_pmm(void);
-
-// Fills a buffer with the attrbute block
+// Fills a buffer with the attribute block
 uint8_t attribute_block(uint8_t *buf, uint16_t data_len);
 
 // Determines the response to a Type 3 command received from initiator

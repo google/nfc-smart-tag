@@ -28,11 +28,6 @@ void rcs956_rf_off(void);
 // Checks whether a target (card, phone) is present.
 bool initiator_poll(uint8_t idm[], uint8_t pmm[], uint16_t syscode);
 
-// Sends data to the NFC module and receives a response.
-int initiator_command(uint8_t *payload, size_t payload_len,
-                      uint8_t *resp, size_t resp_len,
-                      uint16_t timeout);
-
 // Defines the retry count for RF communication for InListPassiveTarget
 bool rcs956_set_retry(uint8_t retry);
 

@@ -38,6 +38,9 @@ extern enum PROTOCOL_ERROR {
 #define MAX_RECV_SIZE (32 + 7)
 #define MAX_SEND_SIZE (192 + 7)
 
+#define L8(x) (x & 0xff)
+#define H8(x) ((x >> 8) & 0xff)
+
 /*
  * USART_READ_TIMEOUT <= 65535(MAX_COUNTER) * 1024(PRESCALE) * 1000(MS) / F_CPU
  *

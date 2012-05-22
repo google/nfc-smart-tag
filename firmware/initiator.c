@@ -27,6 +27,7 @@
 #include "peripheral/led.h"
 #include "peripheral/timer.h"
 #include "peripheral/usart.h"
+#include "rcs956/rcs956_common.h"
 #include "rcs956/rcs956_initiator.h"
 #include "rcs956/rcs956_protocol.h"
 
@@ -92,7 +93,7 @@ bool initiator(const char push_label[])
       stop_timer();
       lcd_printf(0, "URL %ims %iB", get_timer(), len);
     }
-    initiator_command(buffer, len, resp, sizeof(resp), COMM_TIMEOUT_MS);
+    rcs956_comm_thru_ex(buffer, len, resp, sizeof(resp), IN_COMM_TIMEOUT_MS);
     pushed_url = is_felica_push_response(resp + OFS_DATA + 1, len);
     rcs956_rf_off(); // seems to be needed for reseting status in Android.
   } while (!pushed_url && number_retries++ < NUM_RETRY_INITIATOR_LOOP);

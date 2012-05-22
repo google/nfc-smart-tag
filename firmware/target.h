@@ -13,26 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Common commands for RC-S956 NFC Chip
- *
- * See http://www.sony.co.jp/Products/felica/business/tech-support
- *
+ * Allow the base station to act as a target in the following modes:
+ *   Type 3 NFC tag (Felica)
+ *   SNEP NDEF Push over LLCP (ISO 18092)
  */
 
-#ifndef __RC956_COMMON_H__
-#define __RC956_COMMON_H__
+#ifndef __TARGET_H__
+#define __TARGET_H__
 
-#include <stdbool.h>
+#define TG_COMM_TIMEOUT_MS 512
+#define MAX_TARGET_LOOP_TIMES 16
 
-// Sends and receives data through NFC
-int rcs956_comm_thru_ex(uint8_t *payload, size_t payload_len,
-                        uint8_t *resp, size_t resp_len,
-                        uint16_t timeout);
+enum target_res { TGT_COMPLETE, TGT_TIMEOUT, TGT_ERROR, TGT_RETRY };
 
-// Sets the NFC module into mode 0.
-bool rcs956_reset(void);
+// Switch into target mode and respond to Felica or ISO 18092 requests
+enum target_res target(char* label);
 
-// Wakes up NFC module from soft power down.
-void rcs956_serial_wake_up(void);
-
-#endif /* !__RC956_COMMON_H__ */
+#endif /* !__TARGET_H__ */
